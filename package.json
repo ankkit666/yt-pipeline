@@ -1,0 +1,28 @@
+{
+  "name": "yt-video-pipeline",
+  "version": "1.0.0",
+  "description": "Automatic YouTube Video Generation Pipeline - Trend to Script to Voiceover",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts",
+    "test": "jest",
+    "test:watch": "jest --watch"
+  },
+  "dependencies": {
+    "openai": "^4.28.0",
+    "elevenlabs": "^0.4.0",
+    "axios": "^1.6.7",
+    "dotenv": "^16.4.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.16",
+    "@types/jest": "^29.5.12",
+    "typescript": "^5.3.3",
+    "ts-node": "^10.9.2",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2"
+  }
+}

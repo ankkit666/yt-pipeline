@@ -1,0 +1,1 @@
+{"version":3,"file":"trendService.d.ts","sourceRoot":"","sources":["../src/trendService.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,KAAK,EAAE,MAAM,SAAS,CAAC;AA+KhC,wBAAsB,cAAc,CAClC,OAAO,EAAE,MAAM,EACf,YAAY,UAAQ,GACnB,OAAO,CAAC,KAAK,EAAE,CAAC,CA0ElB;AAED,wBAAgB,eAAe,CAAC,OAAO,CAAC,EAAE,MAAM,GAAG,IAAI,CAMtD;AAGD,eAAO,MAAM,SAAS,uBAAiB,CAAC"}
