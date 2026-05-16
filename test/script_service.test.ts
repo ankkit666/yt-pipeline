@@ -1,19 +1,21 @@
 import { generateScript } from '../src/scriptService';
 import { LLMTimeoutError, JSONParseError, ContentPolicyError, AuthError } from '../src/errors';
 
-// Mock OpenAI
+// Mock the OpenAI module properly - needs to be a constructor
+const mockChatCompletionsCreate = jest.fn().mockResolvedValue({
+  choices: [{ message: { content: '{"hook":"Test","sections":["Test section"]}' } }],
+});
+
 jest.mock('openai', () => {
   return class MockOpenAI {
+    constructor() {}
     chat = {
       completions: {
-        create: jest.fn(),
+        create: mockChatCompletionsCreate,
       },
     };
   };
 });
-
-import OpenAI from 'openai';
-const mockCreate = OpenAI.prototype.chat.completions.create as jest.Mock;
 
 describe('ScriptService', () => {
   const mockTrend = {
@@ -32,7 +34,7 @@ describe('ScriptService', () => {
 
   describe('LLM timeout (30s+)', () => {
     it('should catch TimeoutError and retry once', async () => {
-      mockCreate
+      mockChatCompletionsCreate
         .mockRejectedValueOnce(new Error('timeout'))
         .mockResolvedValueOnce({
           choices: [
@@ -46,11 +48,11 @@ describe('ScriptService', () => {
 
       const result = await generateScript(mockTrend, 'ai');
       expect(result.content).toBeTruthy();
-      expect(mockCreate).toHaveBeenCalledTimes(2);
+      expect(mockChatCompletionsCreate).toHaveBeenCalledTimes(2);
     });
 
     it('should fail after retry attempt and show user message', async () => {
-      mockCreate.mockRejectedValue(new Error('timeout'));
+      mockChatCompletionsCreate.mockRejectedValue(new Error('timeout'));
 
       await expect(generateScript(mockTrend, 'ai')).rejects.toThrow(LLMTimeoutError);
     });
@@ -58,7 +60,7 @@ describe('ScriptService', () => {
 
   describe('Invalid JSON response', () => {
     it('should catch JSONParseError and attempt fallback', async () => {
-      mockCreate.mockResolvedValue({
+      mockChatCompletionsCreate.mockResolvedValue({
         choices: [
           {
             message: {
@@ -74,7 +76,7 @@ describe('ScriptService', () => {
     });
 
     it('should show "Invalid response, retrying" message on JSONParseError', async () => {
-      mockCreate.mockResolvedValue({
+      mockChatCompletionsCreate.mockResolvedValue({
         choices: [{ message: { content: '' } }],
       });
 
@@ -88,7 +90,7 @@ describe('ScriptService', () => {
       (apiError as any).code = 'content_policy';
       (apiError as any).status = 400;
 
-      mockCreate.mockRejectedValue(apiError);
+      mockChatCompletionsCreate.mockRejectedValue(apiError);
 
       await expect(generateScript(mockTrend, 'ai')).rejects.toThrow(ContentPolicyError);
     });
@@ -97,7 +99,7 @@ describe('ScriptService', () => {
       const apiError = new Error('content_policy') as any;
       apiError.code = 'content_policy';
 
-      mockCreate.mockRejectedValue(apiError);
+      mockChatCompletionsCreate.mockRejectedValue(apiError);
 
       try {
         await generateScript(mockTrend, 'ai');
@@ -118,7 +120,7 @@ describe('ScriptService', () => {
 
   describe('Script generation', () => {
     it('should generate script with correct structure', async () => {
-      mockCreate.mockResolvedValue({
+      mockChatCompletionsCreate.mockResolvedValue({
         choices: [
           {
             message: {
@@ -146,7 +148,7 @@ Call to action: Subscribe for more AI updates.`,
     });
 
     it('should include trend information in the script', async () => {
-      mockCreate.mockResolvedValue({
+      mockChatCompletionsCreate.mockResolvedValue({
         choices: [
           {
             message: {
